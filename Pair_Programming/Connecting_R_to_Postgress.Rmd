@@ -1,0 +1,87 @@
+---
+title: "Connecting_R_to_PostGres"
+author: "HDS"
+date: "2025-09-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Connecting from R to Postgres
+
+The approach is the same as in Python
+
+-connect to the database using a username, password and a port
+
+-pass sql commands from R to the database
+
+-retrieve results, typically to a data frame
+
+-disconnect from the dataframe
+
+*This entire process is very standard, connections from other languages or
+software packages typically works the same way.    Once you know SQL, you can 
+use it inside many other tools*
+
+```{R}
+# Get libraries, you may need to install these
+
+library(DBI)
+library(RPostgres)
+```
+
+```{R}
+
+#set up the connection to postgres on your local machine - localhost
+
+pw="pwd1"
+
+con <- dbConnect(RPostgres::Postgres(),
+                 dbname = "chinook",
+                 host = "localhost",
+                 port = 5432, 
+                 user = "bob",
+                 password = pw)
+
+# Remove password from environment for security (optional)
+rm(pw) 
+
+```
+
+```{R}
+# list tables, using the R function dbListTables
+# we could do this using an SQL command as well
+
+dbListTables(con)
+
+```
+```{R}
+customer_df=dbGetQuery(con,"SELECT * FROM customer")
+```
+
+
+```{R}
+head(customer_df)
+```
+
+# Question/Action
+
+Run some other SELECT command on chinook, and then show the R summary() of the resulting
+data frame
+
+```{R}
+customer_df = dbGetQuery(con, "SELECT first_name, last_name FROM customer")
+head(customer_df)
+```
+```{R}
+# R summary
+summary(customer_df)
+```
+
+When we are through with the database, we should disconnect
+
+```{R}
+dbDisconnect(con)
+```
